@@ -36,7 +36,7 @@ jobs:
       - name: Package binary
         working-directory: lambdas/${{ matrix.lambda }}
         run: |
-          zip function.zip main
+          zip function.zip bootstrap
 
       # Deploy the Lambda using AWS CLI
       - name: Deploy to Lambda
