@@ -16,6 +16,13 @@ jobs:
           - resources
           # Add more lambdas here if needed
     steps:
+      # Configure AWS Credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/lambda-deployment-role
+          aws-region: us-east-1
+
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
