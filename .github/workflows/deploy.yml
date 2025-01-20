@@ -1,0 +1,50 @@
+name: Update Lambda
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to the main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda:
+          - auth
+          - commpanies
+          - resources
+          # Add more lambdas here if needed
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Go
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23" # Replace with your Go version
+
+      # Build the Go binary for the current Lambda
+      - name: Build Go binary
+        working-directory: lambdas/${{ matrix.lambda }}
+        run: |
+          GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap main.go router.go
+
+      # Package the binary into a ZIP file
+      - name: Package binary
+        working-directory: lambdas/${{ matrix.lambda }}
+        run: |
+          zip function.zip main
+
+      # Deploy the Lambda using AWS CLI
+      - name: Deploy to Lambda
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1 # Replace with your region
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ matrix.lambda }} \
+            --zip-file fileb://function.zip
