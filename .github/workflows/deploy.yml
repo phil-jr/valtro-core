@@ -12,7 +12,7 @@ jobs:
       matrix:
         lambda:
           - auth
-          - commpanies
+          - companies
           - resources
           # Add more lambdas here if needed
     steps:
