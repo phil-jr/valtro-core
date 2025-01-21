@@ -46,10 +46,12 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::128114088254:role/valtro-core-github
           aws-region: us-east-1
+        env:
+          ACTIONS_STEP_DEBUG: true
 
       # Deploy the Lambda or perform other AWS actions
       - name: Deploy Lambda
         run: |
           aws lambda update-function-code \
-            --function-name my-function \
-            --zip-file fileb://function.zip
+            --function-name alpha-companies \
+            --zip-file fileb://$(pwd)/function.zip
