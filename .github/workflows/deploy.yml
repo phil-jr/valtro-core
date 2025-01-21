@@ -51,7 +51,8 @@ jobs:
 
       # Deploy the Lambda or perform other AWS actions
       - name: Deploy Lambda
+        working-directory: lambdas/${{ matrix.lambda }}
         run: |
           aws lambda update-function-code \
             --function-name alpha-companies \
-            --zip-file fileb://$(pwd)/function.zip
+            --zip-file fileb://function.zip
