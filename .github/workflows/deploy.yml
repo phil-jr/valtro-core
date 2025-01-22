@@ -16,6 +16,8 @@ jobs:
       matrix:
         lambda:
           - companies
+          - users
+          - resources
 
     steps:
       # Checkout the repository
@@ -54,5 +56,5 @@ jobs:
         working-directory: lambdas/${{ matrix.lambda }}
         run: |
           aws lambda update-function-code \
-            --function-name alpha-companies \
+            --function-name alpha-${{ matrix.lambda }} \
             --zip-file fileb://function.zip
