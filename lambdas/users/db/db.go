@@ -13,7 +13,7 @@ var Pool *pgxpool.Pool
 func init() {
 	ctx := context.Background()
 
-	dsn := "postgresql://postgres.pixydqwfhsdbzbxehilj:txM54gw@yXHixcK@aws-0-us-east-1.pooler.supabase.com:6543/postgres?simple_protocol=true"
+	dsn := "[REDACTED]"
 	if dsn == "" {
 		log.Fatal("Environment variable POSTGRES_DSN is required")
 	}
