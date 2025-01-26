@@ -87,12 +87,12 @@ func GetUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	return successResponseWithBody(string(body)), nil
 }
 
-// TODO complete
+// TODO complete (with security obv)
 func UpdateUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return internalServerErrorResponse(), nil
 }
 
-// TODO complete
+// TODO complete (with security obv)
 func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return internalServerErrorResponse(), nil
 }
