@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"users/handlers"
 
@@ -10,24 +9,22 @@ import (
 )
 
 func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	path := req.Path
+	resouce := req.Resource
 	method := req.HTTPMethod
-
-	log.Printf("path: %s, method: %s, Rsesouce: %v", path, method, req.Resource)
 
 	switch {
 	// USERS
-	case path == "/users" && method == http.MethodPost:
+	case resouce == "/users" && method == http.MethodPost:
 		return handlers.AddUser(ctx, req)
-	case path == "/users/{userUuid}" && method == http.MethodGet:
+	case resouce == "/users/{userUuid}" && method == http.MethodGet:
 		return handlers.GetUser(ctx, req)
-	case path == "/users/{userUuid}" && method == http.MethodPut:
+	case resouce == "/users/{userUuid}" && method == http.MethodPut:
 		return handlers.UpdateUser(ctx, req)
-	case path == "/users/{userUuid}" && method == http.MethodDelete:
+	case resouce == "/users/{userUuid}" && method == http.MethodDelete:
 		return handlers.DeleteUser(ctx, req)
 
 	// AUTH
-	case path == "/sign-in" && method == http.MethodDelete:
+	case resouce == "/sign-in" && method == http.MethodDelete:
 		return handlers.DeleteUser(ctx, req)
 
 	//DEFAULT
