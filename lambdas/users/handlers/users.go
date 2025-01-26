@@ -97,26 +97,27 @@ func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 }
 
 func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var signIn types.SignIn
-	json_err := json.Unmarshal([]byte(req.Body), &signIn)
+	var signInRequest types.SignIn
+	var signInDb types.SignIn
+	json_err := json.Unmarshal([]byte(req.Body), &signInRequest)
 	if json_err != nil {
 		return inputErrorResponse("Invalid JSON"), nil
 	}
 
-	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signIn.Email)
+	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signInRequest.Email)
 	err := row.Scan(
-		&signIn.Password,
+		&signInDb.Password,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			log.Printf("There was an issue signing in user with: %v", signIn.Email)
+			log.Printf("There was an issue signing in user with: %v", signInRequest.Email)
 			return inputErrorResponseUnauthorized("Incorrect email or password."), nil
 		}
 		log.Printf("Error executing query: %v", err)
 		return internalServerErrorResponse(), nil
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(signIn.Password), []byte(signIn.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(signInDb.Password), []byte(signInRequest.Password))
 	if err != nil {
 		fmt.Println("Password verification failed:", err)
 		return inputErrorResponseUnauthorized("Incorrect email or password."), nil
