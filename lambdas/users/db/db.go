@@ -22,6 +22,8 @@ func init() {
 		log.Fatal("Failed to parse Postgres DSN: %v", err)
 	}
 
+	config.ConnConfig.DefaultQueryExecMode = 1
+
 	Pool, err = pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		log.Fatal("Failed to create connection pool: %v", err)
