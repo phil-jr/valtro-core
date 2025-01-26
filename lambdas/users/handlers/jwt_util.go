@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"time"
+	"users/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -14,13 +15,14 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(email string) (string, error) {
+func GenerateJWT(user types.User) (string, error) {
 	// Define the expiration time for the token
 	expirationTime := time.Now().Add(24 * time.Hour) // Token valid for 24 hours
 
 	// Create the claims
 	claims := &Claims{
-		Email: email,
+		Email:    user.Email,
+		UserUuid: user.UserId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

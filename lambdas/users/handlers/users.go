@@ -98,7 +98,7 @@ func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 
 func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var signInRequest types.SignIn
-	var signInDb types.SignIn
+	var user types.User
 	json_err := json.Unmarshal([]byte(req.Body), &signInRequest)
 	if json_err != nil {
 		return inputErrorResponse("Invalid JSON"), nil
@@ -106,7 +106,8 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 
 	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signInRequest.Email)
 	err := row.Scan(
-		&signInDb.Password,
+		&user.UserId,
+		&user.Password,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -117,13 +118,13 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 		return internalServerErrorResponse(), nil
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(signInDb.Password), []byte(signInRequest.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(signInRequest.Password))
 	if err != nil {
 		fmt.Println("Password verification failed:", err)
 		return inputErrorResponseUnauthorized("Incorrect email or password."), nil
 	}
 
-	token, err := GenerateJWT(signInRequest.Email)
+	token, err := GenerateJWT(user)
 	if err != nil {
 		fmt.Println("Error generating token:", err)
 		return internalServerErrorResponse(), nil

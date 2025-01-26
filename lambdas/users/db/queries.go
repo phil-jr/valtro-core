@@ -34,8 +34,8 @@ const (
 	`
 
 	RetrievePasswordHashQuery = `
-		SELECT password
+		SELECT userUuid, password
 		FROM "USER"
-		WHERE email = $1
+		WHERE email = $1, $2
 	`
 )
