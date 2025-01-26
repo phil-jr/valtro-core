@@ -60,7 +60,15 @@ func GetUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	}
 
 	row := db.Pool.QueryRow(ctx, db.SelectUserQuery, userUuid)
-	err := row.Scan(&user.UserId, &user.CompanyId, &user.FirstName, &user.LastName, &user.Password, &user.Email, &user.Admin, &user.CreatedAt)
+	err := row.Scan(
+		&user.UserId,
+		&user.CompanyId,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.Admin,
+		&user.CreatedAt,
+	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			log.Printf("No user found with ID: %v", userUuid)
