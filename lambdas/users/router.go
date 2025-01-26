@@ -24,7 +24,7 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 		return handlers.DeleteUser(ctx, req)
 
 	// AUTH
-	case resouce == "/sign-in" && method == http.MethodDelete:
+	case resouce == "/sign-in" && method == http.MethodPost:
 		return handlers.SignInUser(ctx, req)
 
 	//DEFAULT
