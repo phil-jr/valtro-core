@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,7 +23,7 @@ func init() {
 		log.Fatal("Failed to parse Postgres DSN: %v", err)
 	}
 
-	config.ConnConfig.DefaultQueryExecMode = 1
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
 
 	Pool, err = pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
