@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -92,5 +93,35 @@ func UpdateUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 }
 
 func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return internalServerErrorResponse(), nil
+}
+
+func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var signIn types.SignIn
+	json_err := json.Unmarshal([]byte(req.Body), &signIn)
+	if json_err != nil {
+		return inputErrorResponse("Invalid JSON"), nil
+	}
+
+	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signIn.Email)
+	err := row.Scan(
+		&signIn.Email,
+		&signIn.Password,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			log.Printf("There was an issue signing in user with: %v", signIn.Email)
+			return inputErrorResponse("Incorrect email or password."), nil
+		}
+		log.Printf("Error executing query: %v", err)
+		return internalServerErrorResponse(), nil
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(signIn.Password), []byte(signIn.Password))
+	if err != nil {
+		fmt.Println("Password verification failed:", err)
+	} else {
+		fmt.Println("Password verification successful")
+	}
 	return internalServerErrorResponse(), nil
 }

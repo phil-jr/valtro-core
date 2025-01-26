@@ -22,4 +22,20 @@ const (
 		FROM "USER"
 		WHERE user_id = $1
 	`
+
+	UpdateUserQuery = `
+		UPDATE "USER"
+		SET first_name = $2, last_name = $3, email = $4, admin = $5
+		WHERE user_id = $1
+	`
+
+	DeleteUserQuery = `
+		DELETE "USER" WHERE user_id = $1
+	`
+
+	RetrievePasswordHashQuery = `
+		SELECT password
+		FROM "USER"
+		WHERE email = $1
+	`
 )

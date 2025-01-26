@@ -12,3 +12,8 @@ type User struct {
 	Admin     bool      `json:"admin"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
+type SignIn struct {
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
