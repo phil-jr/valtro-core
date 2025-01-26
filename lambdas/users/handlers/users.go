@@ -123,5 +123,17 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 		return inputErrorResponseUnauthorized("Incorrect email or password."), nil
 	}
 
-	return successResponse("User sign in successful!"), nil
+	token, err := GenerateJWT(signInRequest.Email)
+	if err != nil {
+		fmt.Println("Error generating token:", err)
+		return internalServerErrorResponse(), nil
+	}
+
+	signInResponse := &types.JwtSignInResponse{
+		Token: token,
+		Ttl:   60 * 60 * 24,
+	}
+
+	body, err := json.Marshal(signInResponse)
+	return successResponseWithBody(string(body)), nil
 }
