@@ -96,6 +96,7 @@ func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 	return internalServerErrorResponse(), nil
 }
 
+// TODO Create cache to check if jwt already exists. If one already does, return it instead of creating a new one
 func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var signInRequest types.SignIn
 	var user types.User
