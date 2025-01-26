@@ -56,7 +56,6 @@ func GetUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	userUuid, ok := req.PathParameters["userUuid"]
 	var user types.User
 	if !ok {
-
 		return inputErrorResponse("Missing path param!"), nil
 	}
 
@@ -88,10 +87,12 @@ func GetUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	return successResponseWithBody(string(body)), nil
 }
 
+// TODO complete
 func UpdateUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return internalServerErrorResponse(), nil
 }
 
+// TODO complete
 func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return internalServerErrorResponse(), nil
 }
