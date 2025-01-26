@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"users/handlers"
 
@@ -12,8 +11,6 @@ import (
 func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	resouce := req.Resource
 	method := req.HTTPMethod
-
-	log.Printf("path: %s, method: %s", path, method)
 
 	switch {
 	// USERS
