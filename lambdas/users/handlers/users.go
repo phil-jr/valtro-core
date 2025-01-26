@@ -84,7 +84,7 @@ func GetUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 		return internalServerErrorResponse(), nil
 	}
 
-	return successResponse(string(body)), nil
+	return successResponseWithBody(string(body)), nil
 }
 
 func UpdateUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
