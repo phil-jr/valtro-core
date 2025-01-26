@@ -13,7 +13,7 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 	path := req.Path
 	method := req.HTTPMethod
 
-	log.Printf("path: %s, method: %s, pathParams: %v", path, method, req.PathParameters)
+	log.Printf("path: %s, method: %s, Rsesouce: %v", path, method, req.Resource)
 
 	switch {
 	// USERS
