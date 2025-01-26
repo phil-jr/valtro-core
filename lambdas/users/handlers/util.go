@@ -31,6 +31,17 @@ func inputErrorResponse(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
+func inputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusUnauthorized,
+		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+	}
+}
+
 // Helper for 200 responses
 func successResponse(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{

@@ -105,13 +105,12 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 
 	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signIn.Email)
 	err := row.Scan(
-		&signIn.Email,
 		&signIn.Password,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			log.Printf("There was an issue signing in user with: %v", signIn.Email)
-			return inputErrorResponse("Incorrect email or password."), nil
+			return inputErrorResponseUnauthorized("Incorrect email or password."), nil
 		}
 		log.Printf("Error executing query: %v", err)
 		return internalServerErrorResponse(), nil
@@ -120,8 +119,8 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 	err = bcrypt.CompareHashAndPassword([]byte(signIn.Password), []byte(signIn.Password))
 	if err != nil {
 		fmt.Println("Password verification failed:", err)
-	} else {
-		fmt.Println("Password verification successful")
+		return inputErrorResponseUnauthorized("Incorrect email or password."), nil
 	}
-	return internalServerErrorResponse(), nil
+
+	return successResponse("User sign in successful!"), nil
 }
