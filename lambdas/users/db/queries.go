@@ -3,39 +3,38 @@ package db
 const (
 	InsertUserQuery = `
 		INSERT INTO "USER" (
-			user_id,
-			company_id,
-			first_name,
-			last_name,
-			password,
-			email,
-			admin,
-			created_at
+			"USER_ID",
+			"COMPANY_ID",
+			"FIRST_NAME",
+			"LAST_NAME",
+			"PASSWORD",
+			"EMAIL",
+			"ADMIN",
+			"CREATED_AT"
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8
-		) RETURNING user_id
+		) RETURNING "USER_ID"
 	`
 
-	// Add more queries as needed
 	SelectUserQuery = `
-		SELECT user_id, company_id, first_name, last_name, email, admin, created_at
+		SELECT "USER_ID", "COMPANY_ID", "FIRST_NAME", "LAST_NAME", "EMAIL", "ADMIN", "CREATED_AT"
 		FROM "USER"
-		WHERE user_id = $1
+		WHERE "USER_ID" = $1
 	`
 
 	UpdateUserQuery = `
 		UPDATE "USER"
-		SET first_name = $2, last_name = $3, email = $4, admin = $5
-		WHERE user_id = $1
+		SET "FIRST_NAME" = $2, "LAST_NAME" = $3, "EMAIL" = $4, "ADMIN" = $5
+		WHERE "USER_ID" = $1
 	`
 
 	DeleteUserQuery = `
-		DELETE "USER" WHERE user_id = $1
+		DELETE FROM "USER" WHERE "USER_ID" = $1
 	`
 
 	RetrievePasswordHashQuery = `
-		SELECT user_id, password
+		SELECT "USER_ID", "PASSWORD"
 		FROM "USER"
-		WHERE email = $1
+		WHERE "EMAIL" = $1
 	`
 )
