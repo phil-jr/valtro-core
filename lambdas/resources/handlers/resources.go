@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"resources/db"
@@ -38,6 +39,7 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 
 // TODO: Check if user has permission
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	totalCost := 0.0
 	resourceUuid, ok := req.PathParameters["resourceUuid"]
 	if !ok {
 		return inputErrorResponse("Missing path param!"), nil
@@ -57,8 +59,14 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 			log.Printf("Row scan failed: %v", err)
 			continue
 		}
+		totalCost += (cost * float64(occurrences))
 		fmt.Printf("Cost: %f, Occurrences: %d\n", cost, occurrences)
 	}
 
-	return internalServerErrorResponse(), nil
+	payload := map[string]float64{
+		"totalCost": totalCost,
+	}
+
+	body, err := json.Marshal(payload)
+	return successResponseWithBody(string(body)), nil
 }
