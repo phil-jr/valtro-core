@@ -36,7 +36,7 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	return internalServerErrorResponse(), nil
 }
 
-// Check if user has permission
+// TODO: Check if user has permission
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	resourceUuid, ok := req.PathParameters["resourceUuid"]
 	if !ok {
