@@ -40,14 +40,19 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 // TODO: Check if user has permission
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	totalCost := 0.0
+	companyUuid, ok := req.PathParameters["companyUuid"]
+	if !ok {
+		return inputErrorResponse("Missing path param!"), nil
+	}
 	resourceUuid, ok := req.PathParameters["resourceUuid"]
 	if !ok {
 		return inputErrorResponse("Missing path param!"), nil
 	}
 
-	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid)
+	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
+		return internalServerErrorResponse(), nil
 	}
 	defer rows.Close()
 
