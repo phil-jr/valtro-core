@@ -38,7 +38,7 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 
 	//DEFAULT
 	default:
-		log.Printf("Incorrect resouce: %v", resouce)
+		log.Printf("Incorrect resouce: %v, with method %v", resouce, method)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,
 			Body:       `{"error":"Not Found resources lambda"}`,
