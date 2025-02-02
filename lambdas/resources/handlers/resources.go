@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"context"
-	// "encoding/json"
+	"fmt"
+	"log"
+	"resources/db"
+
 	// "log"
 	// "net/http"
 
@@ -30,5 +33,32 @@ func RemoveCompanyResource(ctx context.Context, req events.APIGatewayProxyReques
 }
 
 func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return internalServerErrorResponse(), nil
+}
+
+// Check if user has permission
+func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	resourceUuid, ok := req.PathParameters["resourceUuid"]
+	if !ok {
+		return inputErrorResponse("Missing path param!"), nil
+	}
+
+	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid)
+	if err != nil {
+		log.Fatalf("Query failed: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cost float64
+		var occurrences int
+		err := rows.Scan(&cost, &occurrences)
+		if err != nil {
+			log.Printf("Row scan failed: %v", err)
+			continue
+		}
+		fmt.Printf("Cost: %f, Occurrences: %d\n", cost, occurrences)
+	}
+
 	return internalServerErrorResponse(), nil
 }

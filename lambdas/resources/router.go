@@ -29,8 +29,11 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 	case path == "/companies/{companyUuid}/resources/{resourceUuid}" && method == http.MethodDelete:
 		return handlers.RemoveCompanyResource(ctx, req)
 
-	case path == "/companies/{companyUuid}/resources/{resourceUuid}/data" && method == http.MethodPut:
+	case path == "/companies/{companyUuid}/resources/{resourceUuid}/data" && method == http.MethodGet:
 		return handlers.GetCompanyResourceData(ctx, req)
+
+	case path == "/companies/{companyUuid}/resources/{resourceUuid}/cost" && method == http.MethodGet:
+		return handlers.GetCompanyResourceCost(ctx, req)
 
 	//DEFAULT
 	default:
