@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"resources/handlers"
 
@@ -37,6 +38,7 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 
 	//DEFAULT
 	default:
+		log.Printf("Incorrect path: %v", path)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,
 			Body:       `{"error":"Not Found resources lambda"}`,
