@@ -9,7 +9,7 @@ import (
 )
 
 func handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Printf("Request received: %s %s", req.HTTPMethod, req.Resource)
+	log.Printf("Request received: %s %s %s", req.HTTPMethod, req.Resource, req.QueryStringParameters)
 
 	return Router(ctx, req)
 }
