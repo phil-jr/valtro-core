@@ -64,3 +64,14 @@ func successResponseWithBody(body string) events.APIGatewayProxyResponse {
 		},
 	}
 }
+
+func forbiddenError(msg string) events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusForbidden,
+		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+	}
+}

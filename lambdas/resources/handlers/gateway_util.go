@@ -16,7 +16,7 @@ func parseQueryTime(params map[string]string, key string, defaultTime time.Time)
 	return defaultTime, nil
 }
 
-func getPathParam(params map[string]string, key string) (string, error) {
+func getMapValue(params map[string]string, key string) (string, error) {
 	if v, ok := params[key]; ok && v != "" {
 		return v, nil
 	}
