@@ -10,8 +10,9 @@ import (
 var jwtSecret = []byte("your-secret-key")
 
 type Claims struct {
-	Email    string `json:"email"`
-	UserUuid string `json:"userUuid"`
+	Email       string `json:"email"`
+	UserUuid    string `json:"userUuid"`
+	CompanyUuid string `json:"companyUuid"`
 	jwt.RegisteredClaims
 }
 
@@ -21,8 +22,9 @@ func GenerateJWT(user types.User) (string, error) {
 
 	// Create the claims
 	claims := &Claims{
-		Email:    user.Email,
-		UserUuid: user.UserId,
+		Email:       user.Email,
+		UserUuid:    user.UserId,
+		CompanyUuid: user.CompanyId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

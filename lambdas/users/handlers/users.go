@@ -109,6 +109,7 @@ func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 	row := db.Pool.QueryRow(ctx, db.RetrievePasswordHashQuery, signInRequest.Email)
 	err := row.Scan(
 		&user.UserId,
+		&user.CompanyId,
 		&user.Password,
 	)
 	if err != nil {
