@@ -50,3 +50,26 @@ func extractBearerToken(authHeader string) (string, error) {
 	}
 	return token, nil
 }
+
+func UserCanAccessEndpoint(headers map[string]string, companyUuid string) bool {
+	authHeader, err := getMapValue(headers, "Authorization")
+	if err != nil {
+		return false
+	}
+
+	authToken, err := extractBearerToken(authHeader)
+	if err != nil {
+		return false
+	}
+
+	var claims *types.Claims
+	if claims, err = ValidateJWT(authToken); err != nil {
+		return false
+	}
+
+	if claims.CompanyUuid != companyUuid {
+		return false
+	}
+
+	return true
+}

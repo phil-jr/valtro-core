@@ -8,8 +8,6 @@ import (
 	"resources/db"
 	"time"
 
-	"resources/types"
-
 	"github.com/aws/aws-lambda-go/events"
 )
 
@@ -37,19 +35,8 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	return internalServerErrorResponse(), nil
 }
 
-// TODO: Check if user has permission
+
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	authHeader, err := getMapValue(req.Headers, "Authorization")
-	if err != nil {
-		return forbiddenError("Missing Authorization header"), nil
-	}
-
-	authToken, err := extractBearerToken(authHeader)
-	if err != nil {
-		return forbiddenError("Missing Authorization header"), nil
-	}
-
 	totalCost := 0.0
 	endTimestamp := time.Now().UTC()
 	startTimestamp := time.Unix(0, 0).UTC()
@@ -78,12 +65,7 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 		endTimestamp = t
 	}
 
-	var claims *types.Claims
-	if claims, err = ValidateJWT(authToken); err != nil {
-		return forbiddenError("Missing Authorization header"), nil
-	}
-
-	if claims.CompanyUuid != companyUuid {
+	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
 		return forbiddenError("Missing Authorization header"), nil
 	}
 
