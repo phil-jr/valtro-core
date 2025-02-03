@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"time"
 	"users/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("your-secret-key")
+var jwtSecret = []byte("331f3866-08f2-4813-a34f-9e22c14e2d5f-e6f2f77c-a96a-4f82-8542-d45b589d7fad")
 
 type Claims struct {
 	Email       string `json:"email"`
@@ -17,10 +18,8 @@ type Claims struct {
 }
 
 func GenerateJWT(user types.User) (string, error) {
-	// Define the expiration time for the token
-	expirationTime := time.Now().Add(24 * time.Hour) // Token valid for 24 hours
+	expirationTime := time.Now().Add(24 * time.Hour)
 
-	// Create the claims
 	claims := &Claims{
 		Email:       user.Email,
 		UserUuid:    user.UserId,
@@ -31,14 +30,36 @@ func GenerateJWT(user types.User) (string, error) {
 		},
 	}
 
-	// Create the token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Sign the token with the secret key
 	signedToken, err := token.SignedString(jwtSecret)
 	if err != nil {
 		return "", err
 	}
 
 	return signedToken, nil
+}
+
+func ValidateJWT(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		// Verify the signing method is what we expect.
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return jwtSecret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	// Optionally validate standard claims (e.g. Expiration)
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Before(time.Now()) {
+		return nil, errors.New("token is expired")
+	}
+
+	return claims, nil
 }
