@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"resources/db"
+	"time"
 
 	// "log"
 	// "net/http"
@@ -40,16 +41,34 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 // TODO: Check if user has permission
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	totalCost := 0.0
-	companyUuid, ok := req.PathParameters["companyUuid"]
-	if !ok {
-		return inputErrorResponse("Missing path param!"), nil
-	}
-	resourceUuid, ok := req.PathParameters["resourceUuid"]
-	if !ok {
-		return inputErrorResponse("Missing path param!"), nil
+	endTimestamp := time.Now().UTC()
+	startTimestamp := time.Unix(0, 0).UTC()
+
+	companyUuid, err := getPathParam(req.PathParameters, "companyUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
 	}
 
-	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid)
+	resourceUuid, err := getPathParam(req.PathParameters, "resourceUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
+	}
+
+	if t, err := parseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
+		log.Printf("Error parsing startTime: %v", err)
+		return inputErrorResponse("Invalid startTime format"), nil
+	} else {
+		startTimestamp = t
+	}
+
+	if t, err := parseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
+		log.Printf("Error parsing endTime: %v", err)
+		return inputErrorResponse("Invalid endTime format"), nil
+	} else {
+		endTimestamp = t
+	}
+
+	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid, startTimestamp, endTimestamp)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
 		return internalServerErrorResponse(), nil
