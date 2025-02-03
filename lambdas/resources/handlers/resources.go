@@ -8,8 +8,7 @@ import (
 	"resources/db"
 	"time"
 
-	// "log"
-	// "net/http"
+	"resources/types"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -40,16 +39,27 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 
 // TODO: Check if user has permission
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	authHeader, err := getMapValue(req.Headers, "Authorization")
+	if err != nil {
+		return forbiddenError("Missing Authorization header"), nil
+	}
+
+	authToken, err := extractBearerToken(authHeader)
+	if err != nil {
+		return forbiddenError("Missing Authorization header"), nil
+	}
+
 	totalCost := 0.0
 	endTimestamp := time.Now().UTC()
 	startTimestamp := time.Unix(0, 0).UTC()
 
-	companyUuid, err := getPathParam(req.PathParameters, "companyUuid")
+	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
 	if err != nil {
 		return inputErrorResponse(err.Error()), nil
 	}
 
-	resourceUuid, err := getPathParam(req.PathParameters, "resourceUuid")
+	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
 		return inputErrorResponse(err.Error()), nil
 	}
@@ -66,6 +76,15 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 		return inputErrorResponse("Invalid endTime format"), nil
 	} else {
 		endTimestamp = t
+	}
+
+	var claims *types.Claims
+	if claims, err = ValidateJWT(authToken); err != nil {
+		return forbiddenError("Missing Authorization header"), nil
+	}
+
+	if claims.CompanyUuid != companyUuid {
+		return forbiddenError("Missing Authorization header"), nil
 	}
 
 	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid, startTimestamp, endTimestamp)
