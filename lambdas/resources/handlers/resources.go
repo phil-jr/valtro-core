@@ -57,7 +57,7 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 
 	//THIS IS WHAT SECURES THE ENDPOINT
 	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Missing Authorization header"), nil
+		return forbiddenError("Unauthorized"), nil
 	}
 
 	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
