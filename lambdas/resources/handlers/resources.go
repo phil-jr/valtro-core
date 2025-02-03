@@ -32,6 +32,16 @@ func RemoveCompanyResource(ctx context.Context, req events.APIGatewayProxyReques
 }
 
 func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
+	}
+
+	//THIS IS WHAT SECURES THE ENDPOINT
+	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
+		return forbiddenError("Missing Authorization header"), nil
+	}
+
 	return internalServerErrorResponse(), nil
 }
 
