@@ -35,7 +35,6 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	return internalServerErrorResponse(), nil
 }
 
-
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	totalCost := 0.0
 	endTimestamp := time.Now().UTC()
@@ -44,6 +43,11 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
 	if err != nil {
 		return inputErrorResponse(err.Error()), nil
+	}
+
+	//THIS IS WHAT SECURES THE ENDPOINT
+	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
+		return forbiddenError("Missing Authorization header"), nil
 	}
 
 	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
@@ -63,10 +67,6 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 		return inputErrorResponse("Invalid endTime format"), nil
 	} else {
 		endTimestamp = t
-	}
-
-	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Missing Authorization header"), nil
 	}
 
 	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid, startTimestamp, endTimestamp)
