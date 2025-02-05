@@ -32,14 +32,55 @@ func RemoveCompanyResource(ctx context.Context, req events.APIGatewayProxyReques
 }
 
 func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	endTimestamp := time.Now().UTC()
+	startTimestamp := time.Unix(0, 0).UTC()
 	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
 	if err != nil {
 		return inputErrorResponse(err.Error()), nil
 	}
 
-	//THIS IS WHAT SECURES THE ENDPOINT
+	// THIS IS WHAT SECURES THE ENDPOINT
 	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
 		return forbiddenError("Missing Authorization header"), nil
+	}
+
+	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
+	}
+
+	if t, err := parseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
+		log.Printf("Error parsing startTime: %v", err)
+		return inputErrorResponse("Invalid startTime format"), nil
+	} else {
+		startTimestamp = t
+	}
+
+	if t, err := parseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
+		log.Printf("Error parsing endTime: %v", err)
+		return inputErrorResponse("Invalid endTime format"), nil
+	} else {
+		endTimestamp = t
+	}
+
+	rows, err := db.Pool.Query(ctx, db.SelectResouceData, resourceUuid, companyUuid)
+	if err != nil {
+		log.Fatalf("Query failed: %v", err)
+		return internalServerErrorResponse(), nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var metricName string
+		var metricValue int
+		var metricUnit string
+		var timestamp string
+		err := rows.Scan(&metricName, &metricValue, &metricUnit, &timestamp)
+		if err != nil {
+			log.Printf("Row scan failed: %v", err)
+			continue
+		}
+		fmt.Printf("MetricName: %v, MetricValue: %v, MetricUnit: %v, timestamp %v\n", metricName, metricValue, metricUnit, timestamp)
 	}
 
 	return internalServerErrorResponse(), nil
@@ -55,7 +96,7 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 		return inputErrorResponse(err.Error()), nil
 	}
 
-	//THIS IS WHAT SECURES THE ENDPOINT
+	// THIS IS WHAT SECURES THE ENDPOINT
 	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
 		return forbiddenError("Unauthorized"), nil
 	}
