@@ -18,10 +18,10 @@ type User struct {
 }
 
 type Metric struct {
-	Name      string `json:"metricName"`
-	Value     string `json:"metricValue"`
-	Unit      string `json:"metricUnit"`
-	Timestamp string `json:"timestamp"`
+	Name      string  `json:"metricName"`
+	Value     float64 `json:"metricValue"`
+	Unit      string  `json:"metricUnit"`
+	Timestamp string  `json:"timestamp"`
 }
 
 type Claims struct {
