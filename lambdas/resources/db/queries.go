@@ -13,13 +13,19 @@ const (
 	`
 
 	SelectResouceCost = `
-		SELECT *
-		FROM "COST"
+		SELECT
+	      "COST"."RESOURCE_ID",
+	      "COST"."COST",
+	      "COST"."AGGREGATE",
+	      "COST"."START_TIMESTAMP",
+	      "COST"."END_TIMESTAMP",
+	      "COST"."CREATED_AT",
+			FROM "COST"
 	    JOIN "RESOURCE" ON "COST"."RESOURCE_ID" = "RESOURCE"."RESOURCE_ID"
 		WHERE "COST"."RESOURCE_ID" = $1
-	    AND "RESOURCE"."COMPANY_ID" = $2
+		AND "RESOURCE"."COMPANY_ID" = $2
 		AND "START_TIMESTAMP" > $3
-		AND "END_TIMESTAMP" < $4;
+		AND "END_TIMESTAMP" < $4
 	`
 
 	SelectResouceData = `
