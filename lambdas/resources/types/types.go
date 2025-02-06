@@ -30,3 +30,12 @@ type Claims struct {
 	CompanyUuid string `json:"companyUuid"`
 	jwt.RegisteredClaims
 }
+
+type Cost struct {
+	ResourceID     string    `json:"resourceId"`
+	Cost           float64   `json:"cost"`
+	Aggregate      int       `json:"aggregate"`
+	StartTimestamp time.Time `json:"startTimestamp"`
+	EndTimestamp   time.Time `json:"endTimestamp"`
+	CreatedAt      time.Time `json:"createdAt"`
+}

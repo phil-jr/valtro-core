@@ -36,6 +36,9 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/cost" && method == http.MethodGet:
 		return handlers.GetCompanyResourceCost(ctx, req)
 
+	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/totalCost" && method == http.MethodGet:
+		return handlers.GetCompanyResourceTotalCost(ctx, req)
+
 	//DEFAULT
 	default:
 		log.Printf("Incorrect resouce: %v, with method %v", resouce, method)
