@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"resources/db"
+	"resources/types"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -70,20 +71,20 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	}
 	defer rows.Close()
 
+	var metrics []types.Metric
 	for rows.Next() {
-		var metricName string
-		var metricValue int
-		var metricUnit string
-		var timestamp string
-		err := rows.Scan(&metricName, &metricValue, &metricUnit, &timestamp)
+		var metric types.Metric
+		err := rows.Scan(&metric.Name, &metric.Value, &metric.Unit, &metric.Timestamp)
 		if err != nil {
 			log.Printf("Row scan failed: %v", err)
 			continue
 		}
-		fmt.Printf("MetricName: %v, MetricValue: %v, MetricUnit: %v, timestamp %v\n", metricName, metricValue, metricUnit, timestamp)
+		metrics = append(metrics, metric)
 	}
 
-	return internalServerErrorResponse(), nil
+	jsonData, _ := json.MarshalIndent(metrics, "", "  ")
+
+	return successResponseWithBody(string(jsonData)), nil
 }
 
 func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

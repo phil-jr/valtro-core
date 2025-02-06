@@ -17,6 +17,13 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+type Metric struct {
+	Name      string `json:"metricName"`
+	Value     string `json:"metricValue"`
+	Unit      string `json:"metricUnit"`
+	Timestamp string `json:"timestamp"`
+}
+
 type Claims struct {
 	Email       string `json:"email"`
 	UserUuid    string `json:"userUuid"`
