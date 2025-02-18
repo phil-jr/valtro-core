@@ -39,3 +39,10 @@ type Cost struct {
 	EndTimestamp   time.Time `json:"endTimestamp"`
 	CreatedAt      time.Time `json:"createdAt"`
 }
+
+type Resource struct {
+	ResourceID   string    `json:"resourceId"`
+	ResourceName string    `json:"resourceName"`
+	ResourceType string    `json:"resourceType"`
+	CreatedAt    time.Time `json:"createdAt"`
+}

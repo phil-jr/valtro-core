@@ -44,4 +44,16 @@ const (
 		  "RESOURCE"."COMPANY_ID" = $2
 		ORDER BY "TIMESTAMP" ASC;
 	`
+
+	SelectAllCompanyResources = `
+		SELECT
+		  "RESOURCE_ID",
+		  "RESOURCE_NAME",
+		  "NAME" AS "RESOURCE_TYPE",
+		  "CREATED_AT"
+		FROM
+		  "RESOURCE"
+		JOIN
+		  "RESOURCE_TYPES" ON "RESOURCE"."TYPE_ID" = "RESOURCE_TYPES"."ID"
+	`
 )

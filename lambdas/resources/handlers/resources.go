@@ -17,7 +17,42 @@ func GetAllResources(ctx context.Context, req events.APIGatewayProxyRequest) (ev
 }
 
 func GetAllCompanyResources(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return internalServerErrorResponse(), nil
+	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
+	}
+
+	// THIS IS WHAT SECURES THE ENDPOINT
+	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
+		return forbiddenError("Missing Authorization header"), nil
+	}
+
+	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
+	if err != nil {
+		return inputErrorResponse(err.Error()), nil
+	}
+
+	rows, err := db.Pool.Query(ctx, db.SelectAllCompanyResources, resourceUuid, companyUuid)
+	if err != nil {
+		log.Fatalf("Query failed: %v", err)
+		return internalServerErrorResponse(), nil
+	}
+	defer rows.Close()
+
+	var resources []types.Resource
+	for rows.Next() {
+		var resource types.Resource
+		err := rows.Scan(&resource.ResourceID, &resource.ResourceName, &resource.ResourceType, &resource.CreatedAt)
+		if err != nil {
+			log.Printf("Row scan failed: %v", err)
+			continue // Update with real error
+		}
+		resources = append(resources, resource)
+	}
+
+	jsonData, _ := json.MarshalIndent(resources, "", "  ")
+
+	return successResponseWithBody(string(jsonData)), nil
 }
 
 func GetCompanyResource(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
