@@ -27,12 +27,7 @@ func GetAllCompanyResources(ctx context.Context, req events.APIGatewayProxyReque
 		return forbiddenError("Missing Authorization header"), nil
 	}
 
-	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
-	if err != nil {
-		return inputErrorResponse(err.Error()), nil
-	}
-
-	rows, err := db.Pool.Query(ctx, db.SelectAllCompanyResources, resourceUuid, companyUuid)
+	rows, err := db.Pool.Query(ctx, db.SelectAllCompanyResources, companyUuid)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
 		return internalServerErrorResponse(), nil
