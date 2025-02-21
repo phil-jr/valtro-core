@@ -1,7 +1,7 @@
 package util
 
 import (
-	"fmt"
+	// "fmt"
 	"resources/types"
 	"time"
 )
@@ -17,10 +17,10 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 	bucketDur := time.Duration(c) * time.Minute
 
 	// Parse the timestamp of the first metric to initialize our bucket timeline.
-	firstTime, err := time.Parse(time.RFC3339, metrics[0].Timestamp)
-	if err != nil {
-		return nil, fmt.Errorf("cannot parse timestamp %q: %v", metrics[0].Timestamp, err)
-	}
+	firstTime := metrics[0].Timestamp
+	// if err != nil {
+	// 	return nil, fmt.Errorf("cannot parse timestamp %q: %v", metrics[0].Timestamp, err)
+	// }
 
 	var buckets []types.EvenMetric
 	curStart := firstTime

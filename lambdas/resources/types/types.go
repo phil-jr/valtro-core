@@ -18,11 +18,11 @@ type User struct {
 }
 
 type Metric struct {
-	Name      string  `json:"metricName"`
-	Value     float64 `json:"metricValue"`
-	Unit      string  `json:"metricUnit"`
-	Timestamp string  `json:"timestamp"`
-	Aggregate int8    `json:"aggregate"`
+	Name      string    `json:"metricName"`
+	Value     float64   `json:"metricValue"`
+	Unit      string    `json:"metricUnit"`
+	Timestamp time.Time `json:"timestamp"`
+	Aggregate int8      `json:"aggregate"`
 }
 
 type Claims struct {
