@@ -114,6 +114,11 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	}
 
 	evenMetrcis, err := util.EvenlyBucketMetrics(metrics, 5)
+	if err != nil {
+		log.Printf("Even bucket fail: %v", err)
+		return inputErrorResponse(err.Error()), nil
+	}
+
 	jsonData, _ := json.MarshalIndent(evenMetrcis, "", "  ")
 
 	return successResponseWithBody(string(jsonData)), nil
