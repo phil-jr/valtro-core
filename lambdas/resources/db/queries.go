@@ -33,6 +33,7 @@ const (
 		  "METRIC_NAME",
 		  "METRIC_VALUE",
 		  "METRIC_UNIT",
+		  "AGGREGATE",
 		  "TIMESTAMP"
 		FROM
 		  "RESOURCE_DATA"

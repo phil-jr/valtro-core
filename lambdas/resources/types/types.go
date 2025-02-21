@@ -22,6 +22,7 @@ type Metric struct {
 	Value     float64 `json:"metricValue"`
 	Unit      string  `json:"metricUnit"`
 	Timestamp string  `json:"timestamp"`
+	Aggregate int8    `json:"aggregate"`
 }
 
 type Claims struct {
@@ -45,4 +46,12 @@ type Resource struct {
 	ResourceName string    `json:"resourceName"`
 	ResourceType string    `json:"resourceType"`
 	CreatedAt    time.Time `json:"createdAt"`
+}
+
+type EvenMetric struct {
+	Name  string    `json:"metricName"`
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+	Value float64   `json:"value"`
+	Unit  string    `json:"metricUnit"`
 }
