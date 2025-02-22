@@ -9,15 +9,12 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func Router(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
 	resouce := req.Resource
 	method := req.HTTPMethod
 
 	switch {
 	// RESOURCES
-	case resouce == "/resources" && method == http.MethodGet:
-		return handlers.GetAllResources(ctx, req)
-
 	case resouce == "/companies/{companyUuid}/resources" && method == http.MethodGet:
 		return handlers.GetAllCompanyResources(ctx, req)
 
@@ -31,13 +28,13 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 		return handlers.RemoveCompanyResource(ctx, req)
 
 	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/data" && method == http.MethodGet:
-		return handlers.GetCompanyResourceData(ctx, req)
+		return handlers.GetCompanyResourceData(ctx, req, companyUuid)
 
 	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/cost" && method == http.MethodGet:
-		return handlers.GetCompanyResourceCost(ctx, req)
+		return handlers.GetCompanyResourceCost(ctx, req, companyUuid)
 
 	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/totalCost" && method == http.MethodGet:
-		return handlers.GetCompanyResourceTotalCost(ctx, req)
+		return handlers.GetCompanyResourceTotalCost(ctx, req, companyUuid)
 
 	//DEFAULT
 	default:

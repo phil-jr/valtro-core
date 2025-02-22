@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-// evenlyBucketMetrics takes the raw metrics (assumed to be sorted by Timestamp ascending)
-// and produces evenly spaced buckets of length "c" minutes using the provided Aggregate field.
 func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, error) {
 	if len(metrics) == 0 {
 		return nil, nil
@@ -18,10 +16,6 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 
 	// Parse the timestamp of the first metric to initialize our bucket timeline.
 	firstTime := metrics[0].Timestamp
-	// if err != nil {
-	// 	return nil, fmt.Errorf("cannot parse timestamp %q: %v", metrics[0].Timestamp, err)
-	// }
-
 	var buckets []types.EvenMetric
 	curStart := firstTime
 	curEnd := curStart.Add(bucketDur)

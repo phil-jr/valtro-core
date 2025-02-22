@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+
 	"resources/db"
 	"resources/types"
 	"resources/util"
@@ -14,24 +16,24 @@ import (
 )
 
 func GetAllResources(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return internalServerErrorResponse(), nil
+	return util.InternalServerErrorResponse(), nil
 }
 
 func GetAllCompanyResources(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+	companyUuid, err := util.GetMapValue(req.PathParameters, "companyUuid")
 	if err != nil {
-		return inputErrorResponse(err.Error()), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
 	// THIS IS WHAT SECURES THE ENDPOINT
-	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Missing Authorization header"), nil
+	if !util.UserCanAccessEndpoint(req.Headers, companyUuid) {
+		return util.ForbiddenError("Missing Authorization header"), nil
 	}
 
 	rows, err := db.Pool.Query(ctx, db.SelectAllCompanyResources, companyUuid)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
-		return internalServerErrorResponse(), nil
+		return util.InternalServerErrorResponse(), nil
 	}
 	defer rows.Close()
 
@@ -48,49 +50,47 @@ func GetAllCompanyResources(ctx context.Context, req events.APIGatewayProxyReque
 
 	jsonData, _ := json.MarshalIndent(resources, "", "  ")
 
-	return successResponseWithBody(string(jsonData)), nil
+	return util.SuccessResponseWithBody(string(jsonData)), nil
 }
 
 func GetCompanyResource(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return internalServerErrorResponse(), nil
+	return util.InternalServerErrorResponse(), nil
 }
 
 func UpdateCompanyResource(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return internalServerErrorResponse(), nil
+	return util.InternalServerErrorResponse(), nil
 }
 
 func RemoveCompanyResource(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return internalServerErrorResponse(), nil
+	return util.InternalServerErrorResponse(), nil
 }
 
-func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
 	endTimestamp := time.Now().UTC()
 	startTimestamp := time.Unix(0, 0).UTC()
-	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+
+	aggregate := 5
+	if aggStr, err := util.GetMapValue(req.QueryStringParameters, "aggregate"); err == nil {
+		if aggInt, err := strconv.Atoi(aggStr); err == nil {
+			aggregate = aggInt
+		}
+	}
+
+	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
-		return inputErrorResponse(err.Error()), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
-	// THIS IS WHAT SECURES THE ENDPOINT
-	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Missing Authorization header"), nil
-	}
-
-	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
-	if err != nil {
-		return inputErrorResponse(err.Error()), nil
-	}
-
-	if t, err := parseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
 		log.Printf("Error parsing startTime: %v", err)
-		return inputErrorResponse("Invalid startTime format"), nil
+		return util.InputErrorResponse("Invalid startTime format"), nil
 	} else {
 		startTimestamp = t
 	}
 
-	if t, err := parseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
 		log.Printf("Error parsing endTime: %v", err)
-		return inputErrorResponse("Invalid endTime format"), nil
+		return util.InputErrorResponse("Invalid endTime format"), nil
 	} else {
 		endTimestamp = t
 	}
@@ -98,7 +98,7 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 	rows, err := db.Pool.Query(ctx, db.SelectResouceData, resourceUuid, companyUuid)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
-		return internalServerErrorResponse(), nil
+		return util.InternalServerErrorResponse(), nil
 	}
 	defer rows.Close()
 
@@ -113,47 +113,37 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 		metrics = append(metrics, metric)
 	}
 
-	evenMetrcis, err := util.EvenlyBucketMetrics(metrics, 5)
+	evenMetrcis, err := util.EvenlyBucketMetrics(metrics, aggregate)
 	if err != nil {
 		log.Printf("Even bucket fail: %v", err)
-		return inputErrorResponse(err.Error()), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
 	jsonData, _ := json.MarshalIndent(evenMetrcis, "", "  ")
 
-	return successResponseWithBody(string(jsonData)), nil
+	return util.SuccessResponseWithBody(string(jsonData)), nil
 }
 
-func GetCompanyResourceTotalCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func GetCompanyResourceTotalCost(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
 	totalCost := 0.0
 	endTimestamp := time.Now().UTC()
 	startTimestamp := time.Unix(0, 0).UTC()
 
-	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
-		return inputErrorResponse(err.Error()), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
-	// THIS IS WHAT SECURES THE ENDPOINT
-	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Unauthorized"), nil
-	}
-
-	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
-	if err != nil {
-		return inputErrorResponse(err.Error()), nil
-	}
-
-	if t, err := parseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
 		log.Printf("Error parsing startTime: %v", err)
-		return inputErrorResponse("Invalid startTime format"), nil
+		return util.InputErrorResponse("Invalid startTime format"), nil
 	} else {
 		startTimestamp = t
 	}
 
-	if t, err := parseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
 		log.Printf("Error parsing endTime: %v", err)
-		return inputErrorResponse("Invalid endTime format"), nil
+		return util.InputErrorResponse("Invalid endTime format"), nil
 	} else {
 		endTimestamp = t
 	}
@@ -161,7 +151,7 @@ func GetCompanyResourceTotalCost(ctx context.Context, req events.APIGatewayProxy
 	rows, err := db.Pool.Query(ctx, db.SelectResouceTotalCost, resourceUuid, companyUuid, startTimestamp, endTimestamp)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
-		return internalServerErrorResponse(), nil
+		return util.InternalServerErrorResponse(), nil
 	}
 	defer rows.Close()
 
@@ -182,38 +172,28 @@ func GetCompanyResourceTotalCost(ctx context.Context, req events.APIGatewayProxy
 	}
 
 	body, err := json.Marshal(payload)
-	return successResponseWithBody(string(body)), nil
+	return util.SuccessResponseWithBody(string(body)), nil
 }
 
-func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
 	endTimestamp := time.Now().UTC()
 	startTimestamp := time.Unix(0, 0).UTC()
 
-	companyUuid, err := getMapValue(req.PathParameters, "companyUuid")
+	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
-		return inputErrorResponse(err.Error()), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
-	// THIS IS WHAT SECURES THE ENDPOINT
-	if !UserCanAccessEndpoint(req.Headers, companyUuid) {
-		return forbiddenError("Unauthorized"), nil
-	}
-
-	resourceUuid, err := getMapValue(req.PathParameters, "resourceUuid")
-	if err != nil {
-		return inputErrorResponse(err.Error()), nil
-	}
-
-	if t, err := parseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "startTime", startTimestamp); err != nil {
 		log.Printf("Error parsing startTime: %v", err)
-		return inputErrorResponse("Invalid startTime format"), nil
+		return util.InputErrorResponse("Invalid startTime format"), nil
 	} else {
 		startTimestamp = t
 	}
 
-	if t, err := parseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
+	if t, err := util.ParseQueryTime(req.QueryStringParameters, "endTime", endTimestamp); err != nil {
 		log.Printf("Error parsing endTime: %v", err)
-		return inputErrorResponse("Invalid endTime format"), nil
+		return util.InputErrorResponse("Invalid endTime format"), nil
 	} else {
 		endTimestamp = t
 	}
@@ -221,7 +201,7 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 	rows, err := db.Pool.Query(ctx, db.SelectResouceCost, resourceUuid, companyUuid, startTimestamp, endTimestamp)
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
-		return internalServerErrorResponse(), nil
+		return util.InternalServerErrorResponse(), nil
 	}
 	defer rows.Close()
 
@@ -246,5 +226,5 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 
 	jsonData, _ := json.MarshalIndent(costMetrics, "", "  ")
 
-	return successResponseWithBody(string(jsonData)), nil
+	return util.SuccessResponseWithBody(string(jsonData)), nil
 }

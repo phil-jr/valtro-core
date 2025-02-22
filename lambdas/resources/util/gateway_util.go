@@ -1,11 +1,11 @@
-package handlers
+package util
 
 import (
 	"fmt"
 	"time"
 )
 
-func parseQueryTime(params map[string]string, key string, defaultTime time.Time) (time.Time, error) {
+func ParseQueryTime(params map[string]string, key string, defaultTime time.Time) (time.Time, error) {
 	if timeStr, ok := params[key]; ok && timeStr != "" {
 		t, err := time.Parse(time.RFC3339, timeStr)
 		if err != nil {
@@ -16,7 +16,7 @@ func parseQueryTime(params map[string]string, key string, defaultTime time.Time)
 	return defaultTime, nil
 }
 
-func getMapValue(params map[string]string, key string) (string, error) {
+func GetMapValue(params map[string]string, key string) (string, error) {
 	if v, ok := params[key]; ok && v != "" {
 		return v, nil
 	}

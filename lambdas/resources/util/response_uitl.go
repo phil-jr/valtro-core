@@ -1,4 +1,4 @@
-package handlers
+package util
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 // Helper for 500 responses
-func internalServerErrorResponse() events.APIGatewayProxyResponse {
+func InternalServerErrorResponse() events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusInternalServerError,
 		Body:       `{"error":"Internal Server Error"}`,
@@ -20,7 +20,7 @@ func internalServerErrorResponse() events.APIGatewayProxyResponse {
 }
 
 // Helper for 400 responses
-func inputErrorResponse(msg string) events.APIGatewayProxyResponse {
+func InputErrorResponse(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusBadRequest,
 		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
@@ -31,7 +31,7 @@ func inputErrorResponse(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
-func inputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
+func InputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusUnauthorized,
 		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
@@ -43,7 +43,7 @@ func inputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
 }
 
 // Helper for 200 responses
-func successResponse(msg string) events.APIGatewayProxyResponse {
+func SuccessResponse(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
@@ -54,7 +54,7 @@ func successResponse(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
-func successResponseWithBody(body string) events.APIGatewayProxyResponse {
+func SuccessResponseWithBody(body string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       body,
@@ -65,7 +65,7 @@ func successResponseWithBody(body string) events.APIGatewayProxyResponse {
 	}
 }
 
-func forbiddenError(msg string) events.APIGatewayProxyResponse {
+func ForbiddenError(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusForbidden,
 		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),

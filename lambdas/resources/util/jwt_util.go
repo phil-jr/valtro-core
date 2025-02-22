@@ -1,4 +1,4 @@
-package handlers
+package util
 
 import (
 	"errors"
@@ -52,7 +52,7 @@ func extractBearerToken(authHeader string) (string, error) {
 }
 
 func UserCanAccessEndpoint(headers map[string]string, companyUuid string) bool {
-	authHeader, err := getMapValue(headers, "Authorization")
+	authHeader, err := GetMapValue(headers, "Authorization")
 	if err != nil {
 		return false
 	}
