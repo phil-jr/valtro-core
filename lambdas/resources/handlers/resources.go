@@ -95,7 +95,9 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 		endTimestamp = t
 	}
 
+	log.Printf("Start Timestamp: %v | End Timestamp: %v", startTimestamp, endTimestamp)
 	rows, err := db.Pool.Query(ctx, db.SelectResouceData, resourceUuid, companyUuid)
+	ct := 0
 	if err != nil {
 		log.Fatalf("Query failed: %v", err)
 		return util.InternalServerErrorResponse(), nil
@@ -111,7 +113,9 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 			continue
 		}
 		metrics = append(metrics, metric)
+		ct = ct + 1
 	}
+	log.Printf("rownum: %v", len(metrics))
 
 	evenMetrcis, err := util.EvenlyBucketMetrics(metrics, aggregate)
 	if err != nil {
