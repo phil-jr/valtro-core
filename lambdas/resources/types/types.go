@@ -22,7 +22,7 @@ type Metric struct {
 	Value     float64   `json:"metricValue"`
 	Unit      string    `json:"metricUnit"`
 	Timestamp time.Time `json:"timestamp"`
-	Aggregate int8      `json:"aggregate"`
+	Aggregate int64     `json:"aggregate"`
 }
 
 type Claims struct {
