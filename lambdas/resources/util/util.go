@@ -161,8 +161,10 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 			} else { // Average metric.
 				// For avg, each metric m.Value is an average over (m.Aggregate) minutes,
 				// so weighted contribution is m.Value * overlapMinutes.
-				bd.Sum += m.Value * overlapMinutes
-				bd.Weight += overlapMinutes
+				if m.Value != 0 {
+					bd.Sum += m.Value * overlapMinutes
+					bd.Weight += overlapMinutes
+				}
 			}
 		}
 	}
