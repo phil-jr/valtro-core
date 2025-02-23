@@ -71,14 +71,13 @@ import (
 // 	return buckets, nil
 // }
 
-
 func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, error) {
 	if len(metrics) == 0 {
 		return nil, nil
 	}
 
 	// Define the overall lookback period (here: 24 hours)
-	historicMinutes := 24 * 60
+	historicMinutes := 6 * 24 * 60
 	numBuckets := historicMinutes / c
 	bucketStartTime := time.Now().Add(-time.Duration(historicMinutes) * time.Minute)
 
@@ -102,10 +101,10 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 	//   - total contributing minutes (Weight)
 	// For sum metrics, Weight is not used.
 	type bucketData struct {
-		Sum       float64  // Sum for sum metrics OR weighted sum for avg metrics.
-		Weight    float64  // Total minutes contributing (for avg metrics)
-		Unit      string   // The metric unit.
-		IsAverage bool     // true if metric name has "avg" in it.
+		Sum       float64 // Sum for sum metrics OR weighted sum for avg metrics.
+		Weight    float64 // Total minutes contributing (for avg metrics)
+		Unit      string  // The metric unit.
+		IsAverage bool    // true if metric name has "avg" in it.
 	}
 
 	// We'll use a map keyed by metric name and bucket start time.
