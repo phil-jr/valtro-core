@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	// "log"
 	"resources/types"
-	"strings"
+	"slices"
 	"time"
 )
 
@@ -118,7 +118,8 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 		}
 		if bucketMap[metricName][t] == nil {
 			// flag as average if the name contains "avg" (case-insensitive).
-			isAvg := strings.Contains(strings.ToLower(metricName), "avg")
+			averagedMetrics := []string{"duration", "avg_memory"}
+			isAvg := slices.Contains(averagedMetrics, metricName)
 			bucketMap[metricName][t] = &bucketData{
 				Sum:       0,
 				Weight:    0,
