@@ -55,6 +55,7 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 			// Finalize the current bucket if it's full.
 			if accDuration >= bucketDur {
 				buckets = append(buckets, types.EvenMetric{
+					Name:  m.Name,
 					Start: curStart,
 					End:   curEnd,
 					Value: accValue,
