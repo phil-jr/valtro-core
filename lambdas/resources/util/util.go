@@ -16,47 +16,56 @@ func EvenlyBucketMetrics(metrics []types.Metric, c int) ([]types.EvenMetric, err
 	historicMinutes := 24 * 60
 	numBuckets := historicMinutes / c
 	startTime := time.Now().Add(time.Duration(-historicMinutes) * time.Minute)
-	// evaluatedTime := startTime
+	evaluatedTime := startTime
 
 	uniqueMetricType := make(map[string][]types.Metric)
 	for _, m := range metrics {
 		uniqueMetricType[m.Name] = append(uniqueMetricType[m.Name], m)
 	}
 
-
 	var timeArray []time.Time
-	evaluatedTime := startTime
-	for i:=0; i<=numBuckets; i++ {
+	for i := 0; i <= numBuckets; i++ {
 		timeArray = append(timeArray, evaluatedTime)
 		evaluatedTime = evaluatedTime.Add(time.Duration(c) * time.Minute)
 	}
 	log.Printf("timeMap: %v", timeArray)
 
+	for key, value := range uniqueMetricType {
+		for _, m := range value {
+			metricStartTime := m.Timestamp
+			bucketValue := (m.Value / float64(m.Aggregate)) * float64(c)
 
-	// for key, value := range uniqueMetricType {
-	// 	for _, m := range value {
-	// 		metricStartTime := m.Timestamp
-	// 		bucketValue := (m.Value / float64(m.Aggregate)) * float64(c)
+			for index, _ := range timeArray {
 
+				if index+1 == len(timeArray) {
+					continue
+				}
 
+				if (metricStartTime.After(timeArray[index]) || metricStartTime.Equal(timeArray[index])) &&
+					(metricStartTime.Before(timeArray[index+1]) || metricStartTime.Equal(timeArray[index+1])) {
+					buckets = append(buckets, types.EvenMetric{
+						Name:  key,
+						Start: timeArray[index],
+						End:   timeArray[index+1],
+						Value: bucketValue,
+						Unit:  m.Unit,
+					})
+				}
 
-	// 		if (evaluatedTime.After(metricStartTime)|| evaluatedTime.Equal(metricStartTime)) &&
-	// 		   (evaluatedTime.Before(metricEndTime) || evaluatedTime.Equal(metricEndTime)) {
+				// buckets = append(buckets, types.EvenMetric{
+				// 	Name:  key,
+				// 	Start: curStart,
+				// 	End:   curEnd,
+				// 	Value: accValue,
+				// 	Unit:  unit,
+				// })
 
-	// 		}
+			}
 
-	// 		// 	buckets = append(buckets, types.EvenMetric{
-	// 		// 		Name:  key,
-	// 		// 		Start: curStart,
-	// 		// 		End:   curEnd,
-	// 		// 		Value: accValue,
-	// 		// 		Unit:  unit,
-	// 		// 	})
+		}
+	}
 
-	// 		// }
-	// 	}
-	// }
-
+	log.Printf("buckets: %v", buckets)
 
 	return buckets, nil
 }
