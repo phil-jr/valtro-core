@@ -31,9 +31,22 @@ func inputErrorResponse(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
+// Helper for 401 Unauthorized responses
 func inputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusUnauthorized,
+		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+	}
+}
+
+// Helper for 403 Forbidden responses
+func inputErrorResponseForbidden(msg string) events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusForbidden,
 		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
 		Headers: map[string]string{
 			"Content-Type":                "application/json",
@@ -54,6 +67,7 @@ func successResponse(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
+// Wrapper for 200 responces with a body
 func successResponseWithBody(body string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,

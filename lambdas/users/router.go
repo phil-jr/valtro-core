@@ -27,7 +27,7 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 	case resouce == "/sign-in" && method == http.MethodPost:
 		return handlers.SignInUser(ctx, req)
 
-	//DEFAULT
+	// DEFAULT
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,

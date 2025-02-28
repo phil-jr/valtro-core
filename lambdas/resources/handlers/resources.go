@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"resources/db"
 	"resources/types"
 	"resources/util"
-	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -74,15 +74,6 @@ func GetCompanyResourceData(ctx context.Context, req events.APIGatewayProxyReque
 		if aggInt, err := strconv.Atoi(aggStr); err == nil {
 			aggregate = aggInt
 		}
-	}
-
-	if startTime, err := util.GetMapValue(req.QueryStringParameters, "startTime"); err == nil {
-		// startTimestamp = startTime
-		log.Printf("startTime %v", startTime)
-	}
-	if endTime, err := util.GetMapValue(req.QueryStringParameters, "startTime"); err != nil {
-		// endTimestamp = endTime
-		log.Printf("startTime %v", endTime)
 	}
 
 	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")

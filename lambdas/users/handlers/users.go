@@ -17,7 +17,6 @@ import (
 )
 
 func AddUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	var user types.User
 	err := json.Unmarshal([]byte(req.Body), &user)
 	if err != nil {
@@ -101,6 +100,7 @@ func DeleteUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.
 func SignInUser(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var signInRequest types.SignIn
 	var user types.User
+
 	json_err := json.Unmarshal([]byte(req.Body), &signInRequest)
 	if json_err != nil {
 		return inputErrorResponse("Invalid JSON"), nil
