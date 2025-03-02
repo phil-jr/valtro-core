@@ -3,6 +3,8 @@ package main
 import (
 	"companies/handlers"
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -11,6 +13,9 @@ import (
 func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	path := req.Path
 	method := req.HTTPMethod
+
+	log.Printf("Looking at path %v", path)
+	fmt.Printf("Looking at path %v", path)
 
 	switch {
 	// COMPANIES
