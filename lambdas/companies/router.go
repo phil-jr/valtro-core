@@ -55,6 +55,10 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 	case path == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodDelete:
 		return handlers.DeleteTeamMember(ctx, req)
 
+	//ACCOUNTS
+	case path == "/companies/{companyUuid}/attachRoleArn" && method == http.MethodPost:
+		return handlers.AttachCompanyRoleArn(ctx, req)
+
 	//DEFAULT
 	default:
 		return events.APIGatewayProxyResponse{
