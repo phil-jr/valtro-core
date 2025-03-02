@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/url"
+	"log"
 
 	// "log"
 	// "net/http"
@@ -49,20 +49,43 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 
 	iamClient := iam.New(sess)
 
-	roleOutput, err := iamClient.GetRole(&iam.GetRoleInput{
-		RoleName: aws.String("alpha-metric-processor-role-616fl245"),
+	getPolicyOutput, err := iamClient.GetRolePolicy(&iam.GetRolePolicyInput{
+		RoleName:   aws.String("alpha-metric-processor-role-616fl245"),
+		PolicyName: aws.String("assume-role-policy"),
 	})
 	if err != nil {
 		fmt.Printf("failed to create session: %v", err)
 	}
 
-	encodedPolicy := aws.StringValue(roleOutput.Role.AssumeRolePolicyDocument)
-	decodedPolicy, err := url.QueryUnescape(encodedPolicy)
+	var policy Policy
+	err = json.Unmarshal([]byte(*getPolicyOutput.PolicyDocument), &policy)
 	if err != nil {
-		fmt.Printf("failed to create session: %v", err)
+		log.Fatalf("Failed to unmarshal policy: %v", err)
 	}
 
-	return util.SuccessResponse(decodedPolicy), nil
+	// Update the policy by adding the new ARN
+	for i, statement := range policy.Statement {
+		if statement.Action == "sts:AssumeRole" {
+			// Check the current type of Resource
+			switch resource := statement.Resource.(type) {
+			case string:
+				// If Resource is a string, convert it to a slice and add the new ARN
+				policy.Statement[i].Resource = []string{resource, arnAttachRequest.Arn}
+			case []interface{}:
+				// If Resource is already a slice, append the new ARN
+				resources := make([]string, len(resource))
+				for j, r := range resource {
+					resources[j] = r.(string)
+				}
+				resources = append(resources, arnAttachRequest.Arn)
+				policy.Statement[i].Resource = resources
+			default:
+				log.Fatalf("Unexpected Resource type: %T", resource)
+			}
+		}
+	}
+
+	return util.SuccessResponse(*getPolicyOutput.PolicyDocument), nil
 }
 
 func (p *Policy) addResource(newARN string) error {
