@@ -3,65 +3,60 @@ package main
 import (
 	"companies/handlers"
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 )
 
 func Router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	path := req.Path
+	resouce := req.Resource
 	method := req.HTTPMethod
-
-	log.Printf("Looking at path %v", path)
-	fmt.Printf("Looking at path %v", path)
 
 	switch {
 	// COMPANIES
-	case path == "/companies" && method == http.MethodGet:
+	case resouce == "/companies" && method == http.MethodGet:
 		return handlers.GetAllCompanies(ctx, req)
 
-	case path == "/companies" && method == http.MethodPost:
+	case resouce == "/companies" && method == http.MethodPost:
 		return handlers.AddCompany(ctx, req)
 
-	case path == "/companies/{companyUuid}" && method == http.MethodGet:
+	case resouce == "/companies/{companyUuid}" && method == http.MethodGet:
 		return handlers.GetCompany(ctx, req)
 
-	case path == "/companies/{companyUuid}" && method == http.MethodDelete:
+	case resouce == "/companies/{companyUuid}" && method == http.MethodDelete:
 		return handlers.DeleteCompany(ctx, req)
 
-	case path == "/companies/{companyUuid}" && method == http.MethodPut:
+	case resouce == "/companies/{companyUuid}" && method == http.MethodPut:
 		return handlers.UpdateCompany(ctx, req)
 
 	// TEAMS
-	case path == "/companies/{companyUuid}/teams" && method == http.MethodPost:
+	case resouce == "/companies/{companyUuid}/teams" && method == http.MethodPost:
 		return handlers.AddTeam(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams" && method == http.MethodGet:
+	case resouce == "/companies/{companyUuid}/teams" && method == http.MethodGet:
 		return handlers.GetAllCompanyTeams(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodGet:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodGet:
 		return handlers.GetTeam(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodDelete:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodDelete:
 		return handlers.DeleteTeam(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodPut:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}" && method == http.MethodPut:
 		return handlers.UpdateTeam(ctx, req)
 
 	// TEAM MEMBERS
-	case path == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodGet:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodGet:
 		return handlers.GetTeamMembers(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodPost:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodPost:
 		return handlers.AddTeamMember(ctx, req)
 
-	case path == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodDelete:
+	case resouce == "/companies/{companyUuid}/teams/{teamUuid}/members" && method == http.MethodDelete:
 		return handlers.DeleteTeamMember(ctx, req)
 
 	//ACCOUNTS
-	case path == "/companies/{companyUuid}/attachRoleArn" && method == http.MethodPost:
+	case resouce == "/companies/{companyUuid}/attachRoleArn" && method == http.MethodPost:
 		return handlers.AttachCompanyRoleArn(ctx, req)
 
 	//DEFAULT
