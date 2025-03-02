@@ -106,7 +106,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 	updatedPolicyBytes, err := json.Marshal(policy)
 	log.Println(updatedPolicyBytes)
 
-	return util.SuccessResponse(decodedPolicyDocument), nil
+	return util.SuccessResponse(string(updatedPolicyBytes)), nil
 }
 
 func (p *Policy) addResource(newARN string) error {
