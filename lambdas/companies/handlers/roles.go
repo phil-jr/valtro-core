@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	// "log"
 	// "net/http"
@@ -111,7 +112,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 	// Create a new policy version with the updated document
 	_, err = iamClient.CreatePolicyVersion(&iam.CreatePolicyVersionInput{
 		PolicyArn:      aws.String(policyARN),
-		PolicyDocument: aws.String(string(updatedPolicyBytes)),
+		PolicyDocument: aws.String(strings.ReplaceAll(string(updatedPolicyBytes), " ", "")),
 		SetAsDefault:   aws.Bool(true), // Set this version as the default
 	})
 	if err != nil {
