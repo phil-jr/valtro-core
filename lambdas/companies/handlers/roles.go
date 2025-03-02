@@ -104,39 +104,19 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 
 	// Marshal the updated policy back to JSON
 	updatedPolicyBytes, err := json.Marshal(policy)
-	log.Println(updatedPolicyBytes)
+	if err != nil {
+		log.Fatalf("Failed to marshal updated policy: %v", err)
+	}
+
+	// Create a new policy version with the updated document
+	_, err = iamClient.CreatePolicyVersion(&iam.CreatePolicyVersionInput{
+		PolicyArn:      aws.String(policyARN),
+		PolicyDocument: aws.String(string(updatedPolicyBytes)),
+		SetAsDefault:   aws.Bool(true), // Set this version as the default
+	})
+	if err != nil {
+		log.Fatalf("Failed to create policy version: %v", err)
+	}
 
 	return util.SuccessResponse(string(updatedPolicyBytes)), nil
-}
-
-func (p *Policy) addResource(newARN string) error {
-	for i, stmt := range p.Statement {
-		// Check if the Action (or any other indicator) matches what we expect.
-		// In this case, we target the sts:AssumeRole statement.
-		if stmt.Action == "sts:AssumeRole" {
-			switch resource := stmt.Resource.(type) {
-			case string:
-				// Convert single string to slice
-				p.Statement[i].Resource = []string{resource, newARN}
-			case []interface{}:
-				// Convert []interface{} to []string while appending newARN
-				var resources []string
-				for _, v := range resource {
-					if s, ok := v.(string); ok {
-						resources = append(resources, s)
-					} else {
-						fmt.Printf("unexpected resource type")
-					}
-				}
-				resources = append(resources, newARN)
-				p.Statement[i].Resource = resources
-			case []string:
-				// Directly append if already a slice of strings
-				p.Statement[i].Resource = append(resource, newARN)
-			default:
-				fmt.Printf("unknown type for Resource")
-			}
-		}
-	}
-	return nil
 }
