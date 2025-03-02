@@ -50,7 +50,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 	iamClient := iam.New(sess)
 
 	roleOutput, err := iamClient.GetRole(&iam.GetRoleInput{
-		RoleName: aws.String("alpha-metric-processor-role-616fl245 "),
+		RoleName: aws.String("alpha-metric-processor-role-616fl245"),
 	})
 	if err != nil {
 		fmt.Printf("failed to create session: %v", err)
