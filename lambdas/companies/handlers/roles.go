@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 
 	// "log"
 	// "net/http"
@@ -48,17 +49,31 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 	}
 
 	iamClient := iam.New(sess)
+	policyARN := "arn:aws:iam::128114088254:policy/assume-role-policy"
 
-	getPolicyOutput, err := iamClient.GetRolePolicy(&iam.GetRolePolicyInput{
-		RoleName:   aws.String("alpha-metric-processor-role-616fl245"),
-		PolicyName: aws.String("assume-role-policy"),
+	getPolicyOutput, err := iamClient.GetPolicy(&iam.GetPolicyInput{
+		PolicyArn: aws.String(policyARN),
 	})
 	if err != nil {
 		fmt.Printf("failed to create session: %v", err)
 	}
 
+	getPolicyVersionOutput, err := iamClient.GetPolicyVersion(&iam.GetPolicyVersionInput{
+		PolicyArn: aws.String(policyARN),
+		VersionId: getPolicyOutput.Policy.DefaultVersionId,
+	})
+	if err != nil {
+		log.Fatalf("Failed to get policy version: %v", err)
+	}
+
+	encodedPolicyDocument := *getPolicyVersionOutput.PolicyVersion.Document
+	decodedPolicyDocument, err := url.QueryUnescape(encodedPolicyDocument)
+	if err != nil {
+		log.Fatalf("Failed to decode policy document: %v", err)
+	}
+
 	var policy Policy
-	err = json.Unmarshal([]byte(*getPolicyOutput.PolicyDocument), &policy)
+	err = json.Unmarshal([]byte(decodedPolicyDocument), &policy)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal policy: %v", err)
 	}
@@ -75,7 +90,9 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 				// If Resource is already a slice, append the new ARN
 				resources := make([]string, len(resource))
 				for j, r := range resource {
-					resources[j] = r.(string)
+					if str, ok := r.(string); ok {
+						resources[j] = str
+					}
 				}
 				resources = append(resources, arnAttachRequest.Arn)
 				policy.Statement[i].Resource = resources
@@ -85,7 +102,11 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 		}
 	}
 
-	return util.SuccessResponse(*getPolicyOutput.PolicyDocument), nil
+	// Marshal the updated policy back to JSON
+	updatedPolicyBytes, err := json.Marshal(policy)
+	log.Println(updatedPolicyBytes)
+
+	return util.SuccessResponse(decodedPolicyDocument), nil
 }
 
 func (p *Policy) addResource(newARN string) error {
