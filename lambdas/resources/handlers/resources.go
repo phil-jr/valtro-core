@@ -243,19 +243,19 @@ func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyR
 	}
 
 	var resource types.ResourceWithArn
-	err = db.Pool.QueryRow(
+	row := db.Pool.QueryRow(
 		ctx,
 		db.SelectCompanyResource,
 		companyUuid,
 		resourceUuid,
-	).Scan(&resource)
+	)
+
+	err = row.Scan(&resource.ResourceID, &resource.ResourceName, &resource.RoleArn)
 	if err != nil {
-		log.Printf("Failed to insert record and get new ID: %v\n", err)
-		return util.InternalServerErrorResponse(), nil
+		return util.InputErrorResponse(err.Error()), nil
 	}
 
 	lambdaClient := util.FetchLambdaClient(resource.RoleArn)
-
 	getInput := &lambda.GetFunctionConfigurationInput{
 		FunctionName: aws.String(resource.ResourceName),
 		// Qualifier: aws.String("your-alias-or-version"), // Optional: Specify an alias or version
