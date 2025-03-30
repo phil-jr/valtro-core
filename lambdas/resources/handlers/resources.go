@@ -281,5 +281,19 @@ func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyR
 	log.Printf("  Description:   %s\n", aws.ToString(result.Description))
 	log.Printf("  Last Modified: %s\n", aws.ToString(result.LastModified))
 
+	updateInput := &lambda.UpdateFunctionConfigurationInput{
+		FunctionName: aws.String(resource.ResourceName),
+	}
+
+	updateInput.MemorySize = aws.Int32(int32(1024))
+
+	log.Printf("Attempting to update configuration for function: %s\n", resource.ResourceName)
+	updateResult, err := lambdaClient.UpdateFunctionConfiguration(context.TODO(), updateInput)
+	if err != nil {
+		log.Fatalf("Error updating function configuration: %v", err)
+	}
+
+	log.Printf("Update result: %v", updateResult.LastUpdateStatus)
+
 	return util.SuccessResponse("Success!"), nil
 }
