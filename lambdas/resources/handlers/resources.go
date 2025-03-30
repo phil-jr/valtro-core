@@ -246,8 +246,8 @@ func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyR
 	err = db.Pool.QueryRow(
 		ctx,
 		db.SelectCompanyResource,
-		resourceUuid,
 		companyUuid,
+		resourceUuid,
 	).Scan(&resource)
 	if err != nil {
 		log.Printf("Failed to insert record and get new ID: %v\n", err)
