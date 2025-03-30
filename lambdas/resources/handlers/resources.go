@@ -243,8 +243,6 @@ func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyR
 		return util.InputErrorResponse("Invalid JSON"), nil
 	}
 
-	log.Printf("RESOURCE CONFIGSSSSSSSSSSSS %v", resourceConfigs)
-
 	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
 		return util.InputErrorResponse(err.Error()), nil
@@ -272,28 +270,22 @@ func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyR
 	log.Printf("Attempting to get configuration for function: %s\n", resource.ResourceName)
 
 	// Call the GetFunctionConfiguration API
-	result, err := lambdaClient.GetFunctionConfiguration(context.TODO(), getInput)
+	currentConfigs, err := lambdaClient.GetFunctionConfiguration(context.TODO(), getInput)
 	if err != nil {
 		log.Fatalf("Error getting function configuration: %v", err)
 	}
-
-	// --- Process Results ---
-	log.Println("Successfully retrieved configuration:")
-	log.Printf("  Function Name: %s\n", aws.ToString(result.FunctionName))
-	log.Printf("  Function ARN:  %s\n", aws.ToString(result.FunctionArn))
-	log.Printf("  Runtime:       %s\n", result.Runtime) // Runtime is of type types.Runtime
-	log.Printf("  Role ARN:      %s\n", aws.ToString(result.Role))
-	log.Printf("  Handler:       %s\n", aws.ToString(result.Handler))
-	log.Printf("  Memory (MB):   %d\n", aws.ToInt32(result.MemorySize))
-	log.Printf("  Timeout (s):   %d\n", aws.ToInt32(result.Timeout))
-	log.Printf("  Description:   %s\n", aws.ToString(result.Description))
-	log.Printf("  Last Modified: %s\n", aws.ToString(result.LastModified))
 
 	updateInput := &lambda.UpdateFunctionConfigurationInput{
 		FunctionName: aws.String(resource.ResourceName),
 	}
 
-	updateInput.MemorySize = aws.Int32(int32(1024))
+	if resourceConfigs.MemoryMB != 0 && resourceConfigs.MemoryMB != *currentConfigs.MemorySize {
+		updateInput.MemorySize = aws.Int32(resourceConfigs.MemoryMB)
+	}
+
+	if resourceConfigs.Timeout != 0 && resourceConfigs.Timeout != *currentConfigs.Timeout {
+		updateInput.Timeout = aws.Int32(resourceConfigs.Timeout)
+	}
 
 	log.Printf("Attempting to update configuration for function: %s\n", resource.ResourceName)
 	updateResult, err := lambdaClient.UpdateFunctionConfiguration(context.TODO(), updateInput)
