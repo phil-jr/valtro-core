@@ -42,6 +42,17 @@ func InputErrorResponseUnauthorized(msg string) events.APIGatewayProxyResponse {
 	}
 }
 
+func NotFoundErrorResponse(msg string) events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusNotFound,
+		Body:       fmt.Sprintf("{\"message\":\"%s\"}", msg),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+	}
+}
+
 // Helper for 200 responses
 func SuccessResponse(msg string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
