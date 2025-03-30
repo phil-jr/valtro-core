@@ -61,3 +61,10 @@ type ResourceWithArn struct {
 	ResourceName string `json:"resourceName"`
 	RoleArn      string `json:"roleArn"`
 }
+
+type ResourceConfigs struct {
+	MemoryMB               int32 `json:"memoryMb"`
+	ReservedConcurrency    int32 `json:"reservedConcurrencyMb"`
+	ProvisionedConcurrency int32 `json:"provisionedConcurrencyMb"`
+	Timeout                int32 `json:"timeout"`
+}

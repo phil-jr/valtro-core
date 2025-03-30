@@ -237,6 +237,14 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 
 func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
 
+	var resourceConfigs types.ResourceConfigs
+	err := json.Unmarshal([]byte(req.Body), &resourceConfigs)
+	if err != nil {
+		return util.InputErrorResponse("Invalid JSON"), nil
+	}
+
+	log.Printf("RESOURCE CONFIGSSSSSSSSSSSS %v", resourceConfigs)
+
 	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
 	if err != nil {
 		return util.InputErrorResponse(err.Error()), nil
