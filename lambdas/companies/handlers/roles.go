@@ -55,6 +55,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 	getPolicyOutput, err := iamClient.GetPolicy(&iam.GetPolicyInput{
 		PolicyArn: aws.String(policyARN),
 	})
+
 	if err != nil {
 		fmt.Printf("failed to create session: %v", err)
 	}
@@ -63,6 +64,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 		PolicyArn: aws.String(policyARN),
 		VersionId: getPolicyOutput.Policy.DefaultVersionId,
 	})
+
 	if err != nil {
 		log.Fatalf("Failed to get policy version: %v", err)
 	}
@@ -103,6 +105,37 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 		}
 	}
 
+	// List all policy versions
+	listVersionsOutput, err := iamClient.ListPolicyVersions(&iam.ListPolicyVersionsInput{
+		PolicyArn: aws.String(policyARN),
+	})
+	if err != nil {
+		log.Fatalf("Failed to list policy versions: %v", err)
+	}
+
+	// Check if we need to delete a version (if we have 5 versions)
+	if len(listVersionsOutput.Versions) >= 5 {
+		// Find a non-default version to delete
+		var versionToDelete *string
+		for _, version := range listVersionsOutput.Versions {
+			if !*version.IsDefaultVersion {
+				versionToDelete = version.VersionId
+				break
+			}
+		}
+
+		if versionToDelete != nil {
+			// Delete the non-default version
+			_, err = iamClient.DeletePolicyVersion(&iam.DeletePolicyVersionInput{
+				PolicyArn: aws.String(policyARN),
+				VersionId: versionToDelete,
+			})
+			if err != nil {
+				log.Fatalf("Failed to delete policy version: %v", err)
+			}
+		}
+	}
+
 	// Marshal the updated policy back to JSON
 	updatedPolicyBytes, err := json.Marshal(policy)
 	if err != nil {
@@ -116,7 +149,7 @@ func AttachCompanyRoleArn(ctx context.Context, req events.APIGatewayProxyRequest
 		SetAsDefault:   aws.Bool(true), // Set this version as the default
 	})
 	if err != nil {
-		log.Fatalf("Failed to create policy version: %v", err)
+		log.Fatalf("Failed to create policy version: %v \n Policy %v", err, strings.ReplaceAll(string(updatedPolicyBytes), " ", ""))
 	}
 
 	return util.SuccessResponse(string(updatedPolicyBytes)), nil

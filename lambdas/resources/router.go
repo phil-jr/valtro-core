@@ -36,6 +36,9 @@ func Router(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid 
 	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/totalCost" && method == http.MethodGet:
 		return handlers.GetCompanyResourceTotalCost(ctx, req, companyUuid)
 
+	case resouce == "/companies/{companyUuid}/resources/{resourceUuid}/update" && method == http.MethodPatch:
+		return handlers.UpdateCompanyResourceInfra(ctx, req, companyUuid)
+
 	//DEFAULT
 	default:
 		log.Printf("Incorrect resource: %v, with method %v", resouce, method)

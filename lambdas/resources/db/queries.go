@@ -59,4 +59,19 @@ const (
 		WHERE
 			"COMPANY_ID" = $1
 	`
+
+	SelectCompanyResource = `
+		SELECT
+			"RESOURCE_ID",
+			"RESOURCE_NAME",
+			"ACCOUNT_ROLE_ARN"
+		FROM
+			"RESOURCE"
+		JOIN
+			"ACCOUNT_ROLE" ON "RESOURCE"."COMPANY_ID" = "ACCOUNT_ROLE"."COMPANY_ID"
+		WHERE
+			"COMPANY_ID" = $1
+		AND
+			"RESOURCE_ID" = $2
+	`
 )

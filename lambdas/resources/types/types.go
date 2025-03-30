@@ -55,3 +55,9 @@ type EvenMetric struct {
 	Value float64   `json:"value"`
 	Unit  string    `json:"metricUnit"`
 }
+
+type ResourceWithArn struct {
+	ResourceID   string `json:"resourceId"`
+	ResourceName string `json:"resourceName"`
+	RoleArn      string `json:"roleArn"`
+}

@@ -13,6 +13,8 @@ import (
 	"resources/util"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 )
 
 func GetAllResources(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -231,4 +233,53 @@ func GetCompanyResourceCost(ctx context.Context, req events.APIGatewayProxyReque
 	jsonData, _ := json.MarshalIndent(costMetrics, "", "  ")
 
 	return util.SuccessResponseWithBody(string(jsonData)), nil
+}
+
+func UpdateCompanyResourceInfra(ctx context.Context, req events.APIGatewayProxyRequest, companyUuid string) (events.APIGatewayProxyResponse, error) {
+
+	resourceUuid, err := util.GetMapValue(req.PathParameters, "resourceUuid")
+	if err != nil {
+		return util.InputErrorResponse(err.Error()), nil
+	}
+
+	var resource types.ResourceWithArn
+	err = db.Pool.QueryRow(
+		ctx,
+		db.SelectCompanyResource,
+		resourceUuid,
+		companyUuid,
+	).Scan(&resource)
+	if err != nil {
+		log.Printf("Failed to insert record and get new ID: %v\n", err)
+		return util.InternalServerErrorResponse(), nil
+	}
+
+	lambdaClient := util.FetchLambdaClient(resource.RoleArn)
+
+	getInput := &lambda.GetFunctionConfigurationInput{
+		FunctionName: aws.String(resource.ResourceName),
+		// Qualifier: aws.String("your-alias-or-version"), // Optional: Specify an alias or version
+	}
+
+	log.Printf("Attempting to get configuration for function: %s\n", resource.ResourceName)
+
+	// Call the GetFunctionConfiguration API
+	result, err := lambdaClient.GetFunctionConfiguration(context.TODO(), getInput)
+	if err != nil {
+		log.Fatalf("Error getting function configuration: %v", err)
+	}
+
+	// --- Process Results ---
+	log.Println("Successfully retrieved configuration:")
+	log.Printf("  Function Name: %s\n", aws.ToString(result.FunctionName))
+	log.Printf("  Function ARN:  %s\n", aws.ToString(result.FunctionArn))
+	log.Printf("  Runtime:       %s\n", result.Runtime) // Runtime is of type types.Runtime
+	log.Printf("  Role ARN:      %s\n", aws.ToString(result.Role))
+	log.Printf("  Handler:       %s\n", aws.ToString(result.Handler))
+	log.Printf("  Memory (MB):   %d\n", aws.ToInt32(result.MemorySize))
+	log.Printf("  Timeout (s):   %d\n", aws.ToInt32(result.Timeout))
+	log.Printf("  Description:   %s\n", aws.ToString(result.Description))
+	log.Printf("  Last Modified: %s\n", aws.ToString(result.LastModified))
+
+	return util.SuccessResponse("Success!"), nil
 }
